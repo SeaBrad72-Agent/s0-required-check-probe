@@ -1,0 +1,24 @@
+name: solo-go
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  solo-go-bound:
+    runs-on: ubuntu-latest
+    steps:
+      - name: read the title live (no checkout, no head code)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          title=$(gh pr view "$PR" --repo "$REPO" --json title -q .title)
+          echo "title: $title"
+          case "$title" in
+            *GO*) echo "green"; exit 0 ;;
+          esac
+          echo "red"
+          exit 1
